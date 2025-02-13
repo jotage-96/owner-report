@@ -4,6 +4,8 @@ import CancellationsByMonth from './components/CancellationsByMonth';
 import ReservationsOverTime from './components/ReservationsOverTime';
 import ReservationSourcesPie from './components/ReservationSourcesPie';
 import GroupedBarChart from './components/GroupedBarChart';
+import AverageDailyRate from './components/AverageDailyRate';
+import AverageTicket from './components/AverageTicket';
 import apiService from './services/apiService';
 
 function App() {
@@ -20,8 +22,8 @@ function App() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
     }));
   };
@@ -104,9 +106,15 @@ function App() {
         <>
           <ReservationsOverTime reservations={reservations} />
           <ReservationSourcesPie reservations={reservations} />
+          <AverageTicket reservations={reservations} />
         </>
       )}
-      {availability && <GroupedBarChart availability={availability} />}
+      {availability && (
+        <>
+          <GroupedBarChart availability={availability} />
+          <AverageDailyRate rates={availability} />
+        </>
+      )}
       
       {error && <div className="error-message">{error}</div>}
     </div>
