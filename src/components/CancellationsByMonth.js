@@ -30,7 +30,7 @@ const CancellationsByMonth = ({ reservations }) => {
     const endDate = new Date(Math.max(...dates));
     
     const months = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
     let currentDate = new Date(startDate);
     
@@ -57,7 +57,7 @@ const CancellationsByMonth = ({ reservations }) => {
     // Count cancellations by month using checkInDate
     data.forEach(reservation => {
       const date = new Date(reservation.checkInDate);
-      const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+      const monthName = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][date.getMonth()];
       if (months.includes(monthName)) {
         monthCounts[monthName]++;
       }
@@ -81,19 +81,19 @@ const CancellationsByMonth = ({ reservations }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        display: false,
       },
       title: {
         display: true,
-        text: 'Cancellations by Check-in Month',
+        text: 'Cancelamentos por Mês'
       },
       tooltip: {
         callbacks: {
           title: (tooltipItems) => {
-            return `Month: ${tooltipItems[0].label}`;
+            return `Mês: ${tooltipItems[0].label}`;
           },
           label: (context) => {
-            return `Cancellations: ${context.raw}`;
+            return `Cancelamentos: ${context.raw}`;
           }
         }
       }
@@ -106,13 +106,12 @@ const CancellationsByMonth = ({ reservations }) => {
         },
         title: {
           display: true,
-          text: 'Number of Cancellations'
+          text: 'Número de Cancelamentos'
         }
       },
       x: {
         title: {
-          display: true,
-          text: 'Check-in Month'
+          display: false,
         }
       }
     },

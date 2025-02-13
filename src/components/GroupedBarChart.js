@@ -29,7 +29,7 @@ const GroupedBarChart = ({ availability }) => {
     const endDate = new Date(Math.max(...dates));
     
     const months = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
     let currentDate = new Date(startDate);
     
@@ -51,7 +51,7 @@ const GroupedBarChart = ({ availability }) => {
     // Processar cada dia do payload
     data.forEach(dayData => {
       const date = new Date(dayData.date);
-      const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+      const monthName = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][date.getMonth()];
       const monthIndex = months.indexOf(monthName);
       
       if (monthIndex !== -1) {
@@ -87,22 +87,18 @@ const GroupedBarChart = ({ availability }) => {
   const options = {
     responsive: true,
     scales: {
+      y: {
+        beginAtZero: true,
+        stacked: true,
+        title: {
+          display: true,
+          text: 'Número de Dias'
+        }
+      },
       x: {
         stacked: true,
         title: {
-          display: true,
-          text: 'Meses'
-        }
-      },
-      y: {
-        stacked: true,
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Dias'
-        },
-        ticks: {
-          stepSize: 1
+          display: false,
         }
       }
     },

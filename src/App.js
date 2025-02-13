@@ -229,20 +229,37 @@ function App() {
             </button>
           </div>
           
-          {cancellations && <CancellationsByMonth reservations={cancellations} />}
-          {reservations && (
-            <>
-              <ReservationsOverTime reservations={reservations} />
-              <ReservationSourcesPie reservations={reservations} />
-              <AverageTicket reservations={reservations} />
-            </>
-          )}
-          {availability && (
-            <>
-              <GroupedBarChart availability={availability} />
-              <AverageDailyRate rates={availability} />
-            </>
-          )}
+          <div style={{ position: 'relative' }}>
+            <div style={{ 
+              position: 'absolute',
+              left: '20px',
+              top: '0',
+              bottom: '0',
+              width: '250px',
+              backgroundColor: '#f5f5f5',
+              borderRadius: '8px',
+              padding: '20px',
+            }}>
+              {/* Aqui irão os cartões de estatísticas */}
+            </div>
+
+            <div style={{ marginLeft: '290px' }}>
+              {cancellations && <CancellationsByMonth reservations={cancellations} />}
+              {reservations && (
+                <>
+                  <ReservationsOverTime reservations={reservations} />
+                  <ReservationSourcesPie reservations={reservations} />
+                  <AverageTicket reservations={reservations} />
+                </>
+              )}
+              {availability && (
+                <>
+                  <GroupedBarChart availability={availability} />
+                  <AverageDailyRate rates={availability} />
+                </>
+              )}
+            </div>
+          </div>
           
           {error && <div className="error-message">{error}</div>}
         </div>

@@ -31,7 +31,7 @@ const AverageDailyRate = ({ rates }) => {
     const endDate = new Date(Math.max(...dates));
     
     const months = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
     let currentDate = new Date(startDate);
     
@@ -56,7 +56,7 @@ const AverageDailyRate = ({ rates }) => {
         const price = dayData.prices[0]._mcval?.BRL;
         if (price) {
           const date = new Date(dayData.date);
-          const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+          const monthName = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][date.getMonth()];
           const monthIndex = months.indexOf(monthName);
           if (monthIndex !== -1) {
             monthlyRates[monthIndex].sum += price;
@@ -92,7 +92,7 @@ const AverageDailyRate = ({ rates }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        display: false,
       },
       title: {
         display: true,
@@ -101,8 +101,7 @@ const AverageDailyRate = ({ rates }) => {
       tooltip: {
         callbacks: {
           label: (context) => {
-            const value = context.raw;
-            return value ? `Média: R$ ${value.toFixed(2)}` : 'Sem dados';
+            return `R$ ${context.raw.toFixed(2)}`;
           }
         }
       }
@@ -120,8 +119,7 @@ const AverageDailyRate = ({ rates }) => {
       },
       x: {
         title: {
-          display: true,
-          text: 'Mês'
+          display: false,
         }
       }
     },

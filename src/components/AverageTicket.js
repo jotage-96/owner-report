@@ -29,7 +29,7 @@ const AverageTicket = ({ reservations }) => {
     const endDate = new Date(Math.max(...dates));
     
     const months = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     
     let currentDate = new Date(startDate);
     
@@ -53,7 +53,7 @@ const AverageTicket = ({ reservations }) => {
       if (reservation.checkInDate && 
           reservation.price?.hostingDetails?._f_total) {
         const date = new Date(reservation.checkInDate);
-        const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+        const monthName = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][date.getMonth()];
         const monthIndex = months.indexOf(monthName);
         
         if (monthIndex !== -1) {
@@ -88,7 +88,7 @@ const AverageTicket = ({ reservations }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        display: false,
       },
       title: {
         display: true,
@@ -117,8 +117,7 @@ const AverageTicket = ({ reservations }) => {
       },
       x: {
         title: {
-          display: true,
-          text: 'Mês'
+          display: false,
         }
       }
     }

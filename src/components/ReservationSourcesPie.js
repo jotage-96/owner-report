@@ -59,7 +59,7 @@ const ReservationSourcesPie = ({ reservations }) => {
       },
       title: {
         display: true,
-        text: 'Reservation Sources Distribution'
+        text: 'Distribuição das Fontes de Reserva'
       },
       tooltip: {
         callbacks: {
@@ -68,7 +68,7 @@ const ReservationSourcesPie = ({ reservations }) => {
             const value = context.raw || 0;
             const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
             const percentage = ((value / total) * 100).toFixed(1);
-            return `${label}: ${value} reservations (${percentage}%)`;
+            return `${label}: ${value} reservas (${percentage}%)`;
           }
         }
       }
