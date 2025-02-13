@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import CancellationsByMonth from './components/CancellationsByMonth';
 import ReservationsOverTime from './components/ReservationsOverTime';
+import ReservationSourcesPie from './components/ReservationSourcesPie';
+import GroupedBarChart from './components/GroupedBarChart';
 import apiService from './services/apiService';
 
 function App() {
@@ -14,6 +16,7 @@ function App() {
   const [error, setError] = useState(null);
   const [cancellations, setCancellations] = useState(null);
   const [reservations, setReservations] = useState(null);
+  const [availability, setAvailability] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,8 +31,7 @@ function App() {
     setError(null);
 
     try {
-      // Fazer as duas chamadas em paralelo
-      const [cancellationsData, reservationsData] = await Promise.all([
+      const [cancellationsData, reservationsData, availabilityData] = await Promise.all([
         apiService.getCancellations({
           from: formData.startDate,
           to: formData.endDate,
@@ -39,11 +41,19 @@ function App() {
           from: formData.startDate,
           to: formData.endDate,
           ...(formData.listingId && { listingId: formData.listingId })
-        })
+        }),
+        apiService.getAvailability(
+          formData.listingId || 'CK01H',
+          {
+            from: formData.startDate,
+            to: formData.endDate
+          }
+        )
       ]);
 
       setCancellations(cancellationsData);
       setReservations(reservationsData);
+      setAvailability(availabilityData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -90,7 +100,13 @@ function App() {
       </div>
       
       {cancellations && <CancellationsByMonth reservations={cancellations} />}
-      {reservations && <ReservationsOverTime reservations={reservations} />}
+      {reservations && (
+        <>
+          <ReservationsOverTime reservations={reservations} />
+          <ReservationSourcesPie reservations={reservations} />
+        </>
+      )}
+      {availability && <GroupedBarChart availability={availability} />}
       
       {error && <div className="error-message">{error}</div>}
     </div>

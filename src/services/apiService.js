@@ -68,6 +68,13 @@ class ApiService {
     });
   }
 
+  async getAvailability(listingId, params) {
+    return this.fetchData(`calendar/listing/${listingId}`, {
+      ...params,
+      availNoPrices: true
+    });
+  }
+
   // Add new endpoint methods here as needed
 }
 
