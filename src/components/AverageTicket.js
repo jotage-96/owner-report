@@ -20,21 +20,47 @@ ChartJS.register(
 );
 
 const AverageTicket = ({ reservations }) => {
+  const getMonthsInRange = (data) => {
+    if (!data || data.length === 0) return [];
+    
+    // Pegar a primeira e última data do conjunto de dados
+    const dates = data.map(item => new Date(item.checkInDate));
+    const startDate = new Date(Math.min(...dates));
+    const endDate = new Date(Math.max(...dates));
+    
+    const months = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const monthName = monthNames[currentDate.getMonth()];
+      if (!months.includes(monthName)) {
+        months.push(monthName);
+      }
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    return months;
+  };
+
   const processData = (data) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = getMonthsInRange(data);
     const monthlyData = months.map(() => ({ total: 0, count: 0 }));
     
     // Processar cada reserva
     data.forEach(reservation => {
-      // Verificar se tem a data de check-in e o valor total
       if (reservation.checkInDate && 
           reservation.price?.hostingDetails?._f_total) {
         const date = new Date(reservation.checkInDate);
-        const monthIndex = date.getMonth();
+        const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+        const monthIndex = months.indexOf(monthName);
         
-        const totalValue = parseFloat(reservation.price.hostingDetails._f_total);
-        monthlyData[monthIndex].total += totalValue;
-        monthlyData[monthIndex].count += 1;
+        if (monthIndex !== -1) {
+          const totalValue = parseFloat(reservation.price.hostingDetails._f_total);
+          monthlyData[monthIndex].total += totalValue;
+          monthlyData[monthIndex].count += 1;
+        }
       }
     });
 

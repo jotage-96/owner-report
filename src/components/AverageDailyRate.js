@@ -22,20 +22,46 @@ ChartJS.register(
 );
 
 const AverageDailyRate = ({ rates }) => {
+  const getMonthsInRange = (data) => {
+    if (!data || data.length === 0) return [];
+    
+    // Pegar a primeira e última data do conjunto de dados
+    const dates = data.map(item => new Date(item.date));
+    const startDate = new Date(Math.min(...dates));
+    const endDate = new Date(Math.max(...dates));
+    
+    const months = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const monthName = monthNames[currentDate.getMonth()];
+      if (!months.includes(monthName)) {
+        months.push(monthName);
+      }
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    return months;
+  };
+
   const processData = (data) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = getMonthsInRange(data);
     const monthlyRates = months.map(() => ({ sum: 0, count: 0 }));
     
     // Processar cada dia
     data.forEach(dayData => {
-      // Verificar se tem preços e se tem valor em BRL
       if (dayData.prices && dayData.prices.length > 0) {
         const price = dayData.prices[0]._mcval?.BRL;
         if (price) {
           const date = new Date(dayData.date);
-          const monthIndex = date.getMonth();
-          monthlyRates[monthIndex].sum += price;
-          monthlyRates[monthIndex].count += 1;
+          const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+          const monthIndex = months.indexOf(monthName);
+          if (monthIndex !== -1) {
+            monthlyRates[monthIndex].sum += price;
+            monthlyRates[monthIndex].count += 1;
+          }
         }
       }
     });

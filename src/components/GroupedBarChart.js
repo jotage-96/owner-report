@@ -20,19 +20,46 @@ ChartJS.register(
 );
 
 const GroupedBarChart = ({ availability }) => {
+  const getMonthsInRange = (data) => {
+    if (!data || data.length === 0) return [];
+    
+    // Pegar a primeira e última data do conjunto de dados
+    const dates = data.map(item => new Date(item.date));
+    const startDate = new Date(Math.min(...dates));
+    const endDate = new Date(Math.max(...dates));
+    
+    const months = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const monthName = monthNames[currentDate.getMonth()];
+      if (!months.includes(monthName)) {
+        months.push(monthName);
+      }
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    return months;
+  };
+
   const processData = (data) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = getMonthsInRange(data);
     const monthCounts = months.map(() => ({ available: 0, unavailable: 0 }));
     
     // Processar cada dia do payload
     data.forEach(dayData => {
       const date = new Date(dayData.date);
-      const monthIndex = date.getMonth();
+      const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+      const monthIndex = months.indexOf(monthName);
       
-      if (dayData.avail === 1) {
-        monthCounts[monthIndex].available++;
-      } else {
-        monthCounts[monthIndex].unavailable++;
+      if (monthIndex !== -1) {
+        if (dayData.avail === 1) {
+          monthCounts[monthIndex].available++;
+        } else {
+          monthCounts[monthIndex].unavailable++;
+        }
       }
     });
 

@@ -21,22 +21,46 @@ ChartJS.register(
 );
 
 const CancellationsByMonth = ({ reservations }) => {
-  // Process the data
+  const getMonthsInRange = (data) => {
+    if (!data || data.length === 0) return [];
+    
+    // Pegar a primeira e última data do conjunto de dados
+    const dates = data.map(item => new Date(item.checkInDate));
+    const startDate = new Date(Math.min(...dates));
+    const endDate = new Date(Math.max(...dates));
+    
+    const months = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const monthName = monthNames[currentDate.getMonth()];
+      if (!months.includes(monthName)) {
+        months.push(monthName);
+      }
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    return months;
+  };
+
   const processCancellationsByMonth = (data) => {
+    const months = getMonthsInRange(data);
     const monthCounts = {};
     
-    // Initialize all months
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // Initialize selected months
     months.forEach(month => {
       monthCounts[month] = 0;
     });
 
     // Count cancellations by month using checkInDate
     data.forEach(reservation => {
-      // Parse the checkInDate
       const date = new Date(reservation.checkInDate);
-      const month = months[date.getMonth()];
-      monthCounts[month]++;
+      const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+      if (months.includes(monthName)) {
+        monthCounts[monthName]++;
+      }
     });
 
     return {
