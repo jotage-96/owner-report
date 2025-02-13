@@ -25,6 +25,7 @@ function App() {
   const [cancellations, setCancellations] = useState(null);
   const [reservations, setReservations] = useState(null);
   const [availability, setAvailability] = useState(null);
+  const [listingDetails, setListingDetails] = useState(null);
 
   const theme = createTheme({
     palette: {
@@ -78,7 +79,7 @@ function App() {
     setError(null);
 
     try {
-      const [cancellationsData, reservationsData, availabilityData] = await Promise.all([
+      const [cancellationsData, reservationsData, availabilityData, listingData] = await Promise.all([
         apiService.getCancellations({
           from: formData.startDate?.format('YYYY-MM-DD'),
           to: formData.endDate?.format('YYYY-MM-DD'),
@@ -95,12 +96,14 @@ function App() {
             from: formData.startDate?.format('YYYY-MM-DD'),
             to: formData.endDate?.format('YYYY-MM-DD')
           }
-        )
+        ),
+        apiService.getListingDetails(formData.listingId || 'CK01H')
       ]);
 
       setCancellations(cancellationsData);
       setReservations(reservationsData);
       setAvailability(availabilityData);
+      setListingDetails(listingData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -233,20 +236,25 @@ function App() {
           <div style={{ 
             display: 'flex',
             position: 'relative',
-            paddingLeft: '290px'  // Espaço para o StatsContainer
+            paddingLeft: reservations ? '290px' : '0'  // Padding condicional
           }}>
-            <div style={{ 
-              position: 'absolute',
-              left: '20px',
-              top: '0',
-              width: '250px'
-            }}>
-              <StatsContainer />
-            </div>
+            {reservations && (  // Mostra StatsContainer apenas quando houver dados
+              <div style={{ 
+                position: 'absolute',
+                left: '20px',
+                top: '0',
+                width: '250px'
+              }}>
+                <StatsContainer 
+                  listingDetails={listingDetails} 
+                  listingId={formData.listingId || 'CK01H'} 
+                />
+              </div>
+            )}
 
             <div style={{ 
               width: '800px',
-              margin: '0 auto'  // Centraliza os gráficos
+              margin: '0 auto'
             }}>
               {cancellations && <CancellationsByMonth reservations={cancellations} />}
               {reservations && (

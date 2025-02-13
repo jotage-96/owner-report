@@ -1,7 +1,7 @@
 import React from 'react';
 import ListingCard from './ListingCard';
 
-const StatsContainer = () => {
+const StatsContainer = ({ listingDetails, listingId }) => {
   return (
     <div style={{
       width: '250px',
@@ -11,7 +11,7 @@ const StatsContainer = () => {
       marginRight: '20px',
       height: 'fit-content'
     }}>
-      <ListingCard />
+      <ListingCard listingDetails={listingDetails} listingId={listingId} />
       {/* Outros cards de estatísticas virão aqui depois */}
     </div>
   );

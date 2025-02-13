@@ -75,7 +75,36 @@ class ApiService {
     });
   }
 
-  // Add new endpoint methods here as needed
+  async getListingDetails(listingId) {
+    try {
+      const response = await fetch(
+        `/external/v1/content/listings/${listingId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Basic ${this.getAuthHeader()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Falha ao buscar detalhes do imóvel');
+      }
+
+      const data = await response.json();
+      return {
+        title: data._mstitle?.pt_BR,
+        imageUrl: data._t_mainImageMeta?.url,
+        state: data.address?.state,
+        maxGuests: data._i_maxGuests,
+        rooms: data._i_rooms
+      };
+    } catch (error) {
+      console.error('Erro ao buscar detalhes do imóvel:', error);
+      throw error;
+    }
+  }
 }
 
-export default new ApiService(); 
+export default new ApiService();
