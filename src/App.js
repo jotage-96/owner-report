@@ -12,6 +12,7 @@ import GroupedBarChart from './components/GroupedBarChart';
 import AverageDailyRate from './components/AverageDailyRate';
 import AverageTicket from './components/AverageTicket';
 import apiService from './services/apiService';
+import StatsContainer from './components/StatsContainer';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -229,21 +230,24 @@ function App() {
             </button>
           </div>
           
-          <div style={{ position: 'relative' }}>
+          <div style={{ 
+            display: 'flex',
+            position: 'relative',
+            paddingLeft: '290px'  // Espaço para o StatsContainer
+          }}>
             <div style={{ 
               position: 'absolute',
               left: '20px',
               top: '0',
-              bottom: '0',
-              width: '250px',
-              backgroundColor: '#f5f5f5',
-              borderRadius: '8px',
-              padding: '20px',
+              width: '250px'
             }}>
-              {/* Aqui irão os cartões de estatísticas */}
+              <StatsContainer />
             </div>
 
-            <div style={{ marginLeft: '290px' }}>
+            <div style={{ 
+              width: '800px',
+              margin: '0 auto'  // Centraliza os gráficos
+            }}>
               {cancellations && <CancellationsByMonth reservations={cancellations} />}
               {reservations && (
                 <>
