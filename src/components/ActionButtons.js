@@ -5,6 +5,7 @@ import 'dayjs/locale/pt-br';  // Importando o locale português
 import apiService from '../services/apiService';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
+
 // Configurando o locale português como padrão
 dayjs.locale('pt-br');
 
@@ -236,6 +237,17 @@ const ActionButtons = () => {
     }
   };
 
+  const formatDisplayDate = (date) => {
+    if (!date) return '';
+    
+    const meses = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    
+    return `${date.date()} de ${meses[date.month()]}`;
+  };
+
   return (
     <div style={containerStyle}>
       <button 
@@ -273,7 +285,7 @@ const ActionButtons = () => {
               <DesktopDatePicker
                 value={startDate}
                 onChange={handleStartDateChange}
-                format="DD/MM/YYYY"
+                views={['day']}
                 shouldDisableDate={shouldDisableDate}
                 localeText={{
                   cancelButtonLabel: 'Cancelar',
@@ -285,6 +297,9 @@ const ActionButtons = () => {
                     ...datePickerStyles.textField,
                     placeholder: "Data inicial",
                     onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
+                    inputProps: {
+                      value: startDate ? formatDisplayDate(startDate) : '',
+                    }
                   },
                   day: datePickerStyles.day
                 }}
@@ -295,7 +310,7 @@ const ActionButtons = () => {
                 onClose={() => setOpenSecondPicker(false)}
                 onChange={handleEndDateChange}
                 minDate={startDate}
-                format="DD/MM/YYYY"
+                views={['day']}
                 shouldDisableDate={shouldDisableDate}
                 localeText={{
                   cancelButtonLabel: 'Cancelar',
@@ -307,6 +322,9 @@ const ActionButtons = () => {
                     ...datePickerStyles.textField,
                     placeholder: "Data final",
                     onClick: handleEndDateClick,
+                    inputProps: {
+                      value: endDate ? formatDisplayDate(endDate) : '',
+                    }
                   },
                   day: datePickerStyles.day
                 }}

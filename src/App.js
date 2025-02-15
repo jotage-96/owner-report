@@ -136,36 +136,92 @@ function App() {
     }
   };
 
+  const datePickerStyles = {
+    textField: {
+      size: "small",
+      sx: { 
+        width: '100%',
+        '& .MuiInputBase-root': {
+          height: '48px',
+          borderRadius: '32px',
+          cursor: 'pointer',
+          '& input': {
+            cursor: 'pointer',
+            textAlign: 'center',
+          },
+          '&:hover': {
+            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+          },
+        },
+      },
+    },
+    day: {
+      sx: {
+        '&.Mui-disabled': {
+          backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        },
+        '&.Mui-selected': {
+          backgroundColor: 'rgba(25, 118, 210, 0.1) !important',
+          '&:hover': {
+            backgroundColor: 'rgba(25, 118, 210, 0.2) !important',
+          }
+        },
+      },
+    },
+  };
+
+  const shouldDisableDate = (date) => {
+    if (!date) return false;
+    const formattedDate = date.format('YYYY-MM-DD');
+    const dayData = availability?.find(day => day.date === formattedDate);
+    return dayData ? dayData.avail === 0 : false;
+  };
+
+  const formatDisplayDate = (date) => {
+    if (!date) return '';
+    
+    const meses = [
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+    ];
+    
+    return `${date.date()} de ${meses[date.month()]}`;
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <div className="App">
           <div className="search-bar">
-            <div className="search-inputs">
-              <div className="date-inputs">
+            <div className="search-inputs" style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <div className="date-inputs" style={{
+                display: 'flex',
+                gap: '10px'
+              }}>
                 <DesktopDatePicker
                   value={formData.startDate}
                   onChange={handleStartDateChange}
-                  format="DD/MM/YYYY"
+                  views={['day']}
+                  shouldDisableDate={shouldDisableDate}
+                  localeText={{
+                    cancelButtonLabel: 'Cancelar',
+                    toolbarTitle: 'Selecionar data',
+                    okButtonLabel: 'Confirmar',
+                  }}
                   slotProps={{
                     textField: {
-                      size: "small",
-                      placeholder: "Data inicial",
+                      ...datePickerStyles.textField,
+                      placeholder: "Check-in",
                       onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
-                      sx: { 
-                        '& .MuiInputBase-root': {
-                          height: '48px',
-                          borderRadius: '32px',
-                          cursor: 'pointer',
-                          '& input': {
-                            cursor: 'pointer',
-                          },
-                          '&:hover': {
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
-                          },
-                        },
-                      },
+                      inputProps: {
+                        value: formData.startDate ? formatDisplayDate(formData.startDate) : '',
+                      }
                     },
+                    day: datePickerStyles.day
                   }}
                 />
                 <DesktopDatePicker
@@ -174,26 +230,23 @@ function App() {
                   onClose={() => setOpenSecondPicker(false)}
                   onChange={handleEndDateChange}
                   minDate={formData.startDate}
-                  format="DD/MM/YYYY"
+                  views={['day']}
+                  shouldDisableDate={shouldDisableDate}
+                  localeText={{
+                    cancelButtonLabel: 'Cancelar',
+                    toolbarTitle: 'Selecionar data',
+                    okButtonLabel: 'Confirmar',
+                  }}
                   slotProps={{
                     textField: {
-                      size: "small",
-                      placeholder: "Data final",
+                      ...datePickerStyles.textField,
+                      placeholder: "Check-out",
                       onClick: handleEndDateClick,
-                      sx: { 
-                        '& .MuiInputBase-root': {
-                          height: '48px',
-                          borderRadius: '32px',
-                          cursor: 'pointer',
-                          '& input': {
-                            cursor: 'pointer',
-                          },
-                          '&:hover': {
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
-                          },
-                        },
-                      },
+                      inputProps: {
+                        value: formData.endDate ? formatDisplayDate(formData.endDate) : '',
+                      }
                     },
+                    day: datePickerStyles.day
                   }}
                 />
               </div>
@@ -205,6 +258,19 @@ function App() {
                   onChange={handleInputChange}
                   placeholder="ID da propriedade"
                   className="listing-search"
+                  style={{
+                    height: '48px',
+                    borderRadius: '32px',
+                    border: '1px solid #DDDDDD',
+                    padding: '0 16px',
+                    fontSize: '14px',
+                    width: '100%',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+                    },
+                  }}
                 />
               </div>
               <button 
