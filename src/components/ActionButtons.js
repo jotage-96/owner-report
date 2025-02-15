@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import dayjs from 'dayjs';
+import apiService from '../services/apiService';
 
 const ActionButtons = () => {
   const [showModal, setShowModal] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [comment, setComment] = useState('');
+  const [availability, setAvailability] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const buttonStyle = {
     width: '100%',
@@ -42,6 +45,38 @@ const ActionButtons = () => {
     zIndex: 1000,
   };
 
+  const fetchAvailability = async () => {
+    setLoading(true);
+    try {
+      // Pegando dados dos próximos 12 meses
+      const startDate = dayjs();
+      const endDate = dayjs().add(12, 'month');
+      
+      const data = await apiService.getAvailability('CK01H', {
+        from: startDate.format('YYYY-MM-DD'),
+        to: endDate.format('YYYY-MM-DD')
+      });
+      
+      setAvailability(data);
+    } catch (error) {
+      console.error('Error fetching availability:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenModal = async () => {
+    await fetchAvailability();
+    setShowModal(true);
+  };
+
+  // Função para verificar se uma data está bloqueada
+  const shouldDisableDate = (date) => {
+    const formattedDate = date.format('YYYY-MM-DD');
+    const dayData = availability.find(day => day.date === formattedDate);
+    return dayData ? dayData.avail === 0 : false;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle the block creation logic here
@@ -55,8 +90,12 @@ const ActionButtons = () => {
 
   return (
     <div style={containerStyle}>
-      <button style={buttonStyle} onClick={() => setShowModal(true)}>
-        Criar bloqueio
+      <button 
+        style={buttonStyle} 
+        onClick={handleOpenModal}
+        disabled={loading}
+      >
+        {loading ? 'Carregando...' : 'Criar bloqueio'}
       </button>
       <button style={buttonStyle}>
         Alterar preço
@@ -75,6 +114,7 @@ const ActionButtons = () => {
                 value={startDate}
                 onChange={(newValue) => setStartDate(newValue)}
                 format="DD/MM/YYYY"
+                shouldDisableDate={shouldDisableDate}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -96,6 +136,13 @@ const ActionButtons = () => {
                       },
                     },
                   },
+                  day: {
+                    sx: {
+                      '&.Mui-disabled': {
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                      },
+                    },
+                  },
                 }}
               />
             </div>
@@ -106,6 +153,7 @@ const ActionButtons = () => {
                 onChange={(newValue) => setEndDate(newValue)}
                 minDate={startDate}
                 format="DD/MM/YYYY"
+                shouldDisableDate={shouldDisableDate}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -124,6 +172,13 @@ const ActionButtons = () => {
                         '&:hover': {
                           boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
                         },
+                      },
+                    },
+                  },
+                  day: {
+                    sx: {
+                      '&.Mui-disabled': {
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
                       },
                     },
                   },
