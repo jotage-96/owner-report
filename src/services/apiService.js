@@ -105,6 +105,37 @@ class ApiService {
       throw error;
     }
   }
+
+  async createBlock(blockData) {
+    try {
+      const response = await fetch(
+        `/external/v1/booking/reservations`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${this.getAuthHeader()}`
+          },
+          body: JSON.stringify({
+            type: 'blocked',
+            listingId: blockData.listingId,
+            checkInDate: blockData.startDate,
+            checkOutDate: blockData.endDate,
+            internalNote: blockData.comment
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao criar bloqueio');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(`Erro ao criar bloqueio: ${error.message}`);
+    }
+  }
 }
 
 export default new ApiService();

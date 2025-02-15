@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';  // Importando o locale português
 import apiService from '../services/apiService';
+
+// Configurando o locale português como padrão
+dayjs.locale('pt-br');
 
 const ActionButtons = () => {
   const [showModal, setShowModal] = useState(false);
@@ -10,6 +14,7 @@ const ActionButtons = () => {
   const [comment, setComment] = useState('');
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const buttonStyle = {
     width: '100%',
@@ -77,15 +82,36 @@ const ActionButtons = () => {
     return dayData ? dayData.avail === 0 : false;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle the block creation logic here
-    console.log({
-      startDate: startDate?.format('YYYY-MM-DD'),
-      endDate: endDate?.format('YYYY-MM-DD'),
-      comment
-    });
-    setShowModal(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (!startDate || !endDate) {
+        throw new Error('Por favor, selecione as datas inicial e final');
+      }
+
+      await apiService.createBlock({
+        startDate: startDate.format('YYYY-MM-DD'),
+        endDate: endDate.format('YYYY-MM-DD'),
+        listingId: 'CK01H', // usando o ID fixo como mencionado
+        comment: comment
+      });
+
+      // Limpar o formulário e fechar o modal
+      setStartDate(null);
+      setEndDate(null);
+      setComment('');
+      setShowModal(false);
+
+      // Opcional: Recarregar os dados de disponibilidade
+      await fetchAvailability();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,6 +133,17 @@ const ActionButtons = () => {
       {showModal && (
         <div style={modalStyle}>
           <h2>Criar Bloqueio</h2>
+          {error && (
+            <div style={{ 
+              color: 'red', 
+              marginBottom: '15px', 
+              padding: '10px', 
+              backgroundColor: 'rgba(255,0,0,0.1)',
+              borderRadius: '4px'
+            }}>
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '15px' }}>
               <label>De:</label>
@@ -115,6 +152,11 @@ const ActionButtons = () => {
                 onChange={(newValue) => setStartDate(newValue)}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
+                localeText={{
+                  cancelButtonLabel: 'Cancelar',
+                  toolbarTitle: 'Selecionar data',
+                  okButtonLabel: 'Confirmar',
+                }}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -154,6 +196,11 @@ const ActionButtons = () => {
                 minDate={startDate}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
+                localeText={{
+                  cancelButtonLabel: 'Cancelar',
+                  toolbarTitle: 'Selecionar data',
+                  okButtonLabel: 'Confirmar',
+                }}
                 slotProps={{
                   textField: {
                     size: "small",
@@ -198,14 +245,16 @@ const ActionButtons = () => {
                 type="button"
                 onClick={() => setShowModal(false)}
                 style={{ ...buttonStyle, width: 'auto' }}
+                disabled={loading}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 style={{ ...buttonStyle, width: 'auto', backgroundColor: '#007bff', color: 'white' }}
+                disabled={loading}
               >
-                Confirmar
+                {loading ? 'Criando...' : 'Confirmar'}
               </button>
             </div>
           </form>
