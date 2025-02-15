@@ -28,6 +28,7 @@ function App() {
   const [reservations, setReservations] = useState(null);
   const [availability, setAvailability] = useState(null);
   const [listingDetails, setListingDetails] = useState(null);
+  const [openSecondPicker, setOpenSecondPicker] = useState(false);
 
   const theme = createTheme({
     palette: {
@@ -113,6 +114,28 @@ function App() {
     }
   };
 
+  const handleStartDateChange = (newValue) => {
+    setFormData(prev => ({
+      ...prev,
+      startDate: newValue
+    }));
+    setOpenSecondPicker(true);
+  };
+
+  const handleEndDateChange = (newValue) => {
+    setFormData(prev => ({
+      ...prev,
+      endDate: newValue
+    }));
+    setOpenSecondPicker(false);
+  };
+
+  const handleEndDateClick = (e) => {
+    if (formData.startDate) {
+      setOpenSecondPicker(true);
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -122,12 +145,7 @@ function App() {
               <div className="date-inputs">
                 <DesktopDatePicker
                   value={formData.startDate}
-                  onChange={(newValue) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      startDate: newValue
-                    }));
-                  }}
+                  onChange={handleStartDateChange}
                   format="DD/MM/YYYY"
                   slotProps={{
                     textField: {
@@ -152,19 +170,16 @@ function App() {
                 />
                 <DesktopDatePicker
                   value={formData.endDate}
-                  onChange={(newValue) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      endDate: newValue
-                    }));
-                  }}
+                  open={openSecondPicker}
+                  onClose={() => setOpenSecondPicker(false)}
+                  onChange={handleEndDateChange}
                   minDate={formData.startDate}
                   format="DD/MM/YYYY"
                   slotProps={{
                     textField: {
                       size: "small",
                       placeholder: "Data final",
-                      onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
+                      onClick: handleEndDateClick,
                       sx: { 
                         '& .MuiInputBase-root': {
                           height: '48px',

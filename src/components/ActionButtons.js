@@ -17,6 +17,7 @@ const ActionButtons = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [openSecondPicker, setOpenSecondPicker] = useState(false);
 
   const buttonStyle = {
     width: '100%',
@@ -72,6 +73,41 @@ const ActionButtons = () => {
     padding: '40px 20px',
   };
 
+  const datePickerStyles = {
+    textField: {
+      size: "small",
+      sx: { 
+        width: '100%',
+        marginBottom: '15px',
+        '& .MuiInputBase-root': {
+          height: '48px',
+          borderRadius: '32px',
+          cursor: 'pointer',
+          '& input': {
+            cursor: 'pointer',
+            textAlign: 'center',
+          },
+          '&:hover': {
+            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+          },
+        },
+      },
+    },
+    day: {
+      sx: {
+        '&.Mui-disabled': {
+          backgroundColor: 'rgba(255, 0, 0, 0.1)',
+        },
+        '&.Mui-selected': {
+          backgroundColor: 'rgba(25, 118, 210, 0.1) !important',
+          '&:hover': {
+            backgroundColor: 'rgba(25, 118, 210, 0.2) !important',
+          }
+        },
+      },
+    },
+  };
+
   const fetchAvailability = async () => {
     setLoading(true);
     try {
@@ -101,6 +137,12 @@ const ActionButtons = () => {
   const shouldDisableDate = (date) => {
     const formattedDate = date.format('YYYY-MM-DD');
     const dayData = availability.find(day => day.date === formattedDate);
+    
+    // Se for a data inicial selecionada, não deve desabilitar
+    if (startDate && date.isSame(startDate, 'day')) {
+      return false;
+    }
+    
     return dayData ? dayData.avail === 0 : false;
   };
 
@@ -116,6 +158,25 @@ const ActionButtons = () => {
       currentDate = currentDate.add(1, 'day');
     }
     return false;
+  };
+
+  const handleStartDateChange = (newValue) => {
+    setStartDate(newValue);
+    setError(null);
+    // Abre o segundo DatePicker automaticamente
+    setOpenSecondPicker(true);
+  };
+
+  const handleEndDateChange = (newValue) => {
+    setEndDate(newValue);
+    setError(null);
+    setOpenSecondPicker(false);
+  };
+
+  const handleEndDateClick = (e) => {
+    if (startDate) { // Só permite abrir se tiver uma data inicial
+      setOpenSecondPicker(true);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -211,10 +272,7 @@ const ActionButtons = () => {
             <form onSubmit={handleSubmit}>
               <DesktopDatePicker
                 value={startDate}
-                onChange={(newValue) => {
-                  setStartDate(newValue);
-                  setError(null); // Limpa erros ao mudar a data
-                }}
+                onChange={handleStartDateChange}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
                 localeText={{
@@ -224,41 +282,18 @@ const ActionButtons = () => {
                 }}
                 slotProps={{
                   textField: {
-                    size: "small",
+                    ...datePickerStyles.textField,
                     placeholder: "Data inicial",
                     onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
-                    sx: { 
-                      width: '100%',
-                      marginBottom: '15px',
-                      '& .MuiInputBase-root': {
-                        height: '48px',
-                        borderRadius: '32px',
-                        cursor: 'pointer',
-                        '& input': {
-                          cursor: 'pointer',
-                          textAlign: 'center',
-                        },
-                        '&:hover': {
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
-                        },
-                      },
-                    },
                   },
-                  day: {
-                    sx: {
-                      '&.Mui-disabled': {
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                      },
-                    },
-                  },
+                  day: datePickerStyles.day
                 }}
               />
               <DesktopDatePicker
                 value={endDate}
-                onChange={(newValue) => {
-                  setEndDate(newValue);
-                  setError(null); // Limpa erros ao mudar a data
-                }}
+                open={openSecondPicker}
+                onClose={() => setOpenSecondPicker(false)}
+                onChange={handleEndDateChange}
                 minDate={startDate}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
@@ -269,33 +304,11 @@ const ActionButtons = () => {
                 }}
                 slotProps={{
                   textField: {
-                    size: "small",
+                    ...datePickerStyles.textField,
                     placeholder: "Data final",
-                    onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
-                    sx: { 
-                      width: '100%',
-                      marginBottom: '15px',
-                      '& .MuiInputBase-root': {
-                        height: '48px',
-                        borderRadius: '32px',
-                        cursor: 'pointer',
-                        '& input': {
-                          cursor: 'pointer',
-                          textAlign: 'center',
-                        },
-                        '&:hover': {
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
-                        },
-                      },
-                    },
+                    onClick: handleEndDateClick,
                   },
-                  day: {
-                    sx: {
-                      '&.Mui-disabled': {
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                      },
-                    },
-                  },
+                  day: datePickerStyles.day
                 }}
               />
               <div style={{ marginBottom: '15px' }}>
