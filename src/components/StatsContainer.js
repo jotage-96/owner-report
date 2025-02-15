@@ -4,12 +4,7 @@ import ListingCard from './ListingCard';
 const StatsContainer = ({ listingDetails, listingId }) => {
   return (
     <div style={{
-      width: '250px',
       padding: '20px',
-      backgroundColor: '#f5f5f5',
-      borderRadius: '8px',
-      marginRight: '20px',
-      height: 'fit-content'
     }}>
       <ListingCard listingDetails={listingDetails} listingId={listingId} />
       {/* Outros cards de estatísticas virão aqui depois */}

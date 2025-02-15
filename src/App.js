@@ -14,6 +14,7 @@ import AverageTicket from './components/AverageTicket';
 import apiService from './services/apiService';
 import StatsContainer from './components/StatsContainer';
 import ListingCard from './components/ListingCard';
+import ActionButtons from './components/ActionButtons';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -227,48 +228,54 @@ function App() {
                       listingId={formData.listingId || 'CK01H'} 
                     />
                   </div>
+                  <ActionButtons />
                 </>
               )}
             </div>
 
             <div style={{ 
-              width: '1240px',
-              margin: '0 auto'
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center'
             }}>
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '40px',
+                width: '1240px',
                 padding: '20px'
               }}>
-                {cancellations && (
-                  <div>
-                    <CancellationsByMonth reservations={cancellations} />
-                  </div>
-                )}
-                {reservations && (
-                  <>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '40px',
+                }}>
+                  {cancellations && (
                     <div>
-                      <ReservationsOverTime reservations={reservations} />
+                      <CancellationsByMonth reservations={cancellations} />
                     </div>
-                    <div>
-                      <ReservationSourcesPie reservations={reservations} />
-                    </div>
-                    <div>
-                      <AverageTicket reservations={reservations} />
-                    </div>
-                  </>
-                )}
-                {availability && (
-                  <>
-                    <div>
-                      <GroupedBarChart availability={availability} />
-                    </div>
-                    <div>
-                      <AverageDailyRate rates={availability} />
-                    </div>
-                  </>
-                )}
+                  )}
+                  {reservations && (
+                    <>
+                      <div>
+                        <ReservationsOverTime reservations={reservations} />
+                      </div>
+                      <div>
+                        <ReservationSourcesPie reservations={reservations} />
+                      </div>
+                      <div>
+                        <AverageTicket reservations={reservations} />
+                      </div>
+                    </>
+                  )}
+                  {availability && (
+                    <>
+                      <div>
+                        <GroupedBarChart availability={availability} />
+                      </div>
+                      <div>
+                        <AverageDailyRate rates={availability} />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
