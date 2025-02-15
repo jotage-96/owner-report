@@ -12,6 +12,8 @@ import GroupedBarChart from './components/GroupedBarChart';
 import AverageDailyRate from './components/AverageDailyRate';
 import AverageTicket from './components/AverageTicket';
 import apiService from './services/apiService';
+import StatsContainer from './components/StatsContainer';
+import ListingCard from './components/ListingCard';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -202,24 +204,35 @@ function App() {
           <div style={{ 
             display: 'flex',
             position: 'relative',
-            paddingLeft: reservations ? '290px' : '0'  // Padding condicional
           }}>
-            {reservations && (  // Mostra StatsContainer apenas quando houver dados
-              <div style={{ 
-                position: 'absolute',
-                left: '20px',
-                top: '0',
-                width: '250px'
-              }}>
-                {/* <StatsContainer 
-                  listingDetails={listingDetails} 
-                  listingId={formData.listingId || 'CK01H'} 
-                /> */}
-              </div>
-            )}
+            <div style={{
+              width: '290px',
+              minHeight: '100%',
+              borderRight: '1px solid #ccc',
+              backgroundColor: '#fff',
+              padding: '20px',
+              position: 'sticky',
+              top: '0',
+            }}>
+              {listingDetails && (
+                <>
+                  <ListingCard 
+                    listing={listingDetails}
+                    startDate={formData.startDate}
+                    endDate={formData.endDate}
+                  />
+                  <div style={{ marginTop: '20px' }}>
+                    <StatsContainer 
+                      listingDetails={listingDetails} 
+                      listingId={formData.listingId || 'CK01H'} 
+                    />
+                  </div>
+                </>
+              )}
+            </div>
 
             <div style={{ 
-              width: '1240px',  // Ajustado para acomodar 2 gráficos + gap
+              width: '1240px',
               margin: '0 auto'
             }}>
               <div style={{
