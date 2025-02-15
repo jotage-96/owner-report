@@ -131,10 +131,15 @@ function App() {
                     textField: {
                       size: "small",
                       placeholder: "Data inicial",
+                      onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                       sx: { 
                         '& .MuiInputBase-root': {
                           height: '48px',
                           borderRadius: '32px',
+                          cursor: 'pointer',
+                          '& input': {
+                            cursor: 'pointer',
+                          },
                           '&:hover': {
                             boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
                           },
@@ -157,10 +162,15 @@ function App() {
                     textField: {
                       size: "small",
                       placeholder: "Data final",
+                      onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                       sx: { 
                         '& .MuiInputBase-root': {
                           height: '48px',
                           borderRadius: '32px',
+                          cursor: 'pointer',
+                          '& input': {
+                            cursor: 'pointer',
+                          },
                           '&:hover': {
                             boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
                           },

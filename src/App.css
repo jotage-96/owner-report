@@ -84,6 +84,7 @@
   padding: 0 24px;
   font-size: 14px;
   outline: none;
+  text-align: center;
 }
 
 .listing-search:hover {
