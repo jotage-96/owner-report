@@ -4,6 +4,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 import './App.css';
 import CancellationsByMonth from './components/CancellationsByMonth';
 import ReservationsOverTime from './components/ReservationsOverTime';
@@ -15,6 +16,10 @@ import apiService from './services/apiService';
 import StatsContainer from './components/StatsContainer';
 import ListingCard from './components/ListingCard';
 import ActionButtons from './components/ActionButtons';
+import SearchIcon from '@mui/icons-material/Search';
+
+// Configurar locale no início do componente
+dayjs.locale('pt-br');
 
 function App() {
   const [formData, setFormData] = useState({
@@ -119,7 +124,11 @@ function App() {
       ...prev,
       startDate: newValue
     }));
-    setOpenSecondPicker(true);
+    
+    // Pequeno delay para garantir que o primeiro DatePicker feche completamente
+    setTimeout(() => {
+      setOpenSecondPicker(true);
+    }, 100);
   };
 
   const handleEndDateChange = (newValue) => {
@@ -190,7 +199,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
         <div className="App">
           <div className="search-bar">
             <div className="search-inputs" style={{ 
@@ -211,11 +220,13 @@ function App() {
                     cancelButtonLabel: 'Cancelar',
                     toolbarTitle: 'Selecionar data',
                     okButtonLabel: 'Confirmar',
+                    previousMonth: 'Mês anterior',
+                    nextMonth: 'Próximo mês',
                   }}
                   slotProps={{
                     textField: {
                       ...datePickerStyles.textField,
-                      placeholder: "Check-in",
+                      placeholder: "Data inicial",
                       onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                       inputProps: {
                         value: formData.startDate ? formatDisplayDate(formData.startDate) : '',
@@ -236,11 +247,13 @@ function App() {
                     cancelButtonLabel: 'Cancelar',
                     toolbarTitle: 'Selecionar data',
                     okButtonLabel: 'Confirmar',
+                    previousMonth: 'Mês anterior',
+                    nextMonth: 'Próximo mês',
                   }}
                   slotProps={{
                     textField: {
                       ...datePickerStyles.textField,
-                      placeholder: "Check-out",
+                      placeholder: "Data final",
                       onClick: handleEndDateClick,
                       inputProps: {
                         value: formData.endDate ? formatDisplayDate(formData.endDate) : '',
@@ -278,7 +291,7 @@ function App() {
                 onClick={handleSearch}
                 disabled={loading}
               >
-                {loading ? 'Searching...' : 'Search'}
+                {loading ? 'Buscando...' : 'Buscar'}
               </button>
             </div>
           </div>
@@ -317,47 +330,50 @@ function App() {
             <div style={{ 
               flex: 1,
               display: 'flex',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              padding: '40px 20px',
             }}>
-              <div style={{
-                width: '1240px',
-                padding: '20px'
-              }}>
+              {reservations && cancellations && availability ? (
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '40px',
+                  width: '1240px',
+                  padding: '20px'
                 }}>
-                  {cancellations && (
-                    <div>
-                      <CancellationsByMonth reservations={cancellations} />
-                    </div>
-                  )}
-                  {reservations && (
-                    <>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '40px',
+                  }}>
+                    {cancellations && (
                       <div>
-                        <ReservationsOverTime reservations={reservations} />
+                        <CancellationsByMonth reservations={cancellations} />
                       </div>
-                      <div>
-                        <ReservationSourcesPie reservations={reservations} />
-                      </div>
-                      <div>
-                        <AverageTicket reservations={reservations} />
-                      </div>
-                    </>
-                  )}
-                  {availability && (
-                    <>
-                      <div>
-                        <GroupedBarChart availability={availability} />
-                      </div>
-                      <div>
-                        <AverageDailyRate rates={availability} />
-                      </div>
-                    </>
-                  )}
+                    )}
+                    {reservations && (
+                      <>
+                        <div>
+                          <ReservationsOverTime reservations={reservations} />
+                        </div>
+                        <div>
+                          <ReservationSourcesPie reservations={reservations} />
+                        </div>
+                        <div>
+                          <AverageTicket reservations={reservations} />
+                        </div>
+                      </>
+                    )}
+                    {availability && (
+                      <>
+                        <div>
+                          <GroupedBarChart availability={availability} />
+                        </div>
+                        <div>
+                          <AverageDailyRate rates={availability} />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
           
