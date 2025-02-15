@@ -30,7 +30,7 @@ function App() {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#61dafb',
+        main: '#FF385C',
       },
     },
     components: {
@@ -38,18 +38,18 @@ function App() {
         styleOverrides: {
           root: {
             backgroundColor: 'white',
-            borderRadius: '4px',
-            cursor: 'pointer',
+            borderRadius: '32px',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)',
             '& .MuiOutlinedInput-root': {
               cursor: 'pointer',
               '& input': {
                 cursor: 'pointer',
               },
               '& fieldset': {
-                borderColor: '#ccc',
+                borderColor: '#DDDDDD',
               },
               '&:hover fieldset': {
-                borderColor: '#61dafb',
+                borderColor: '#FF385C',
               },
             },
           },
@@ -115,122 +115,79 @@ function App() {
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <div className="App">
-          <div className="input-container">
-            <label>
-              Start Date
-              <DesktopDatePicker
-                value={formData.startDate}
-                onChange={(newValue) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    startDate: newValue
-                  }));
-                }}
-                format="DD/MM/YYYY"
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    placeholder: "Select start date",
-                    sx: { 
-                      width: '200px',
-                      '& .MuiInputBase-root': {
-                        height: '35px',
-                        padding: '0 8px',
-                        '& .MuiInputAdornment-root': {
-                          marginLeft: '2px',
-                          marginRight: '-6px',
+          <div className="search-bar">
+            <div className="search-inputs">
+              <div className="date-inputs">
+                <DesktopDatePicker
+                  value={formData.startDate}
+                  onChange={(newValue) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      startDate: newValue
+                    }));
+                  }}
+                  format="DD/MM/YYYY"
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      placeholder: "Data inicial",
+                      sx: { 
+                        '& .MuiInputBase-root': {
+                          height: '48px',
+                          borderRadius: '32px',
+                          '&:hover': {
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+                          },
                         },
                       },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '8px',
-                        cursor: 'pointer',
-                        userSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        MozUserSelect: 'none',
-                        msUserSelect: 'none',
-                      },
                     },
-                    onClick: (e) => {
-                      e.currentTarget.querySelector('button').click();
-                    }
-                  },
-                  field: {
-                    readOnly: true,
-                    placeholder: "Select start date"
-                  }
-                }}
-                onClose={() => {
-                  if (!formData.startDate) {
-                    const input = document.querySelector('input[placeholder="Select start date"]');
-                    if (input) input.value = '';
-                  }
-                }}
-              />
-            </label>
-            <label>
-              End Date
-              <DesktopDatePicker
-                value={formData.endDate}
-                onChange={(newValue) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    endDate: newValue
-                  }));
-                }}
-                minDate={formData.startDate}
-                format="DD/MM/YYYY"
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    placeholder: "Select end date",
-                    sx: { 
-                      width: '200px',
-                      '& .MuiInputBase-root': {
-                        height: '35px',
-                        padding: '0 8px',
-                        '& .MuiInputAdornment-root': {
-                          marginLeft: '2px',
-                          marginRight: '-6px',
+                  }}
+                />
+                <DesktopDatePicker
+                  value={formData.endDate}
+                  onChange={(newValue) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      endDate: newValue
+                    }));
+                  }}
+                  minDate={formData.startDate}
+                  format="DD/MM/YYYY"
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      placeholder: "Data final",
+                      sx: { 
+                        '& .MuiInputBase-root': {
+                          height: '48px',
+                          borderRadius: '32px',
+                          '&:hover': {
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
+                          },
                         },
                       },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '8px',
-                        cursor: 'pointer',
-                      },
                     },
-                    onClick: (e) => {
-                      e.currentTarget.querySelector('button').click();
-                    }
-                  },
-                  field: {
-                    readOnly: true,
-                    placeholder: "Select end date"
-                  }
-                }}
-                onClose={() => {
-                  if (!formData.endDate) {
-                    const input = document.querySelector('input[placeholder="Select end date"]');
-                    if (input) input.value = '';
-                  }
-                }}
-              />
-            </label>
-            <label>
-              Listing ID
-              <input 
-                type="text" 
-                name="listingId" 
-                value={formData.listingId}
-                onChange={handleInputChange}
-                placeholder="Enter listing ID"
-              />
-            </label>
-            <button 
-              onClick={handleSearch}
-              disabled={loading}
-            >
-              {loading ? 'Searching...' : 'Search'}
-            </button>
+                  }}
+                />
+              </div>
+              <div className="listing-input">
+                <input 
+                  type="text" 
+                  name="listingId" 
+                  value={formData.listingId}
+                  onChange={handleInputChange}
+                  placeholder="ID da propriedade"
+                  className="listing-search"
+                />
+              </div>
+              <button 
+                className="search-button"
+                onClick={handleSearch}
+                disabled={loading}
+              >
+                {loading ? 'Searching...' : 'Search'}
+              </button>
+            </div>
           </div>
           
           <div style={{ 

@@ -1,0 +1,12 @@
+input {
+  outline: none;
+}
+
+input:hover {
+  background-color: #F7F7F7;
+}
+
+input:focus {
+  border-color: #FF385C !important;
+  background-color: white !important;
+} 
