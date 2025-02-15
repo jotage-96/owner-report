@@ -15,6 +15,7 @@ const ActionButtons = () => {
   const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const buttonStyle = {
     width: '100%',
@@ -36,17 +37,27 @@ const ActionButtons = () => {
     marginTop: '20px',
   };
 
-  const modalStyle = {
+  const overlayStyle = {
     position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo escuro semi-transparente
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999, // Garante que fique acima de outros elementos
+  };
+
+  const modalStyle = {
     backgroundColor: 'white',
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
     width: '90%',
     maxWidth: '500px',
+    position: 'relative', // Removido position: fixed pois agora o overlay centraliza
     zIndex: 1000,
   };
 
@@ -82,35 +93,77 @@ const ActionButtons = () => {
     return dayData ? dayData.avail === 0 : false;
   };
 
+  // Função para verificar se há datas indisponíveis no intervalo
+  const hasUnavailableDatesInRange = (start, end) => {
+    if (!start || !end) return false;
+
+    let currentDate = start.clone();
+    while (currentDate.isBefore(end) || currentDate.isSame(end, 'day')) {
+      if (shouldDisableDate(currentDate)) {
+        return true;
+      }
+      currentDate = currentDate.add(1, 'day');
+    }
+    return false;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setSuccessMessage(null);
+    setLoading(true);
 
     try {
+      // Validações
       if (!startDate || !endDate) {
         throw new Error('Por favor, selecione as datas inicial e final');
+      }
+
+      // Verifica se a data final é anterior à data inicial
+      if (endDate.isBefore(startDate)) {
+        throw new Error('A data final não pode ser anterior à data inicial');
+      }
+
+      // Verifica se há datas indisponíveis no intervalo
+      if (hasUnavailableDatesInRange(startDate, endDate)) {
+        throw new Error('Existem datas indisponíveis no período selecionado');
       }
 
       await apiService.createBlock({
         startDate: startDate.format('YYYY-MM-DD'),
         endDate: endDate.format('YYYY-MM-DD'),
-        listingId: 'CK01H', // usando o ID fixo como mencionado
+        listingId: 'CK01H',
         comment: comment
       });
 
-      // Limpar o formulário e fechar o modal
-      setStartDate(null);
-      setEndDate(null);
-      setComment('');
-      setShowModal(false);
+      setSuccessMessage('Bloqueio criado com sucesso!');
+      
+      // Limpa o formulário após 2 segundos e fecha o modal
+      setTimeout(() => {
+        setStartDate(null);
+        setEndDate(null);
+        setComment('');
+        setShowModal(false);
+        setSuccessMessage(null);
+      }, 2000);
 
-      // Opcional: Recarregar os dados de disponibilidade
-      await fetchAvailability();
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOverlayClick = (e) => {
+    // Fecha o modal apenas se o clique foi no overlay (fundo escuro)
+    // e não em algum elemento dentro do modal
+    if (e.target === e.currentTarget && !loading) {
+      setShowModal(false);
+      // Limpa os dados do formulário
+      setStartDate(null);
+      setEndDate(null);
+      setComment('');
+      setError(null);
     }
   };
 
@@ -131,25 +184,43 @@ const ActionButtons = () => {
       </button>
 
       {showModal && (
-        <div style={modalStyle}>
-          <h2>Criar Bloqueio</h2>
-          {error && (
-            <div style={{ 
-              color: 'red', 
-              marginBottom: '15px', 
-              padding: '10px', 
-              backgroundColor: 'rgba(255,0,0,0.1)',
-              borderRadius: '4px'
-            }}>
-              {error}
-            </div>
-          )}
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '15px' }}>
-              <label>De:</label>
+        <div style={overlayStyle} onClick={handleOverlayClick}>
+          <div style={modalStyle}>
+            <h2 style={{ marginTop: 0 }}>Criar Bloqueio</h2>
+            
+            {/* Mensagem de Erro */}
+            {error && (
+              <div style={{ 
+                color: 'red', 
+                marginBottom: '15px', 
+                padding: '10px', 
+                backgroundColor: 'rgba(255,0,0,0.1)',
+                borderRadius: '4px'
+              }}>
+                {error}
+              </div>
+            )}
+
+            {/* Mensagem de Sucesso */}
+            {successMessage && (
+              <div style={{ 
+                color: 'green', 
+                marginBottom: '15px', 
+                padding: '10px', 
+                backgroundColor: 'rgba(0,255,0,0.1)',
+                borderRadius: '4px'
+              }}>
+                {successMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
               <DesktopDatePicker
                 value={startDate}
-                onChange={(newValue) => setStartDate(newValue)}
+                onChange={(newValue) => {
+                  setStartDate(newValue);
+                  setError(null); // Limpa erros ao mudar a data
+                }}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
                 localeText={{
@@ -164,13 +235,14 @@ const ActionButtons = () => {
                     onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                     sx: { 
                       width: '100%',
-                      marginTop: '5px',
+                      marginBottom: '15px',
                       '& .MuiInputBase-root': {
                         height: '48px',
                         borderRadius: '32px',
                         cursor: 'pointer',
                         '& input': {
                           cursor: 'pointer',
+                          textAlign: 'center',
                         },
                         '&:hover': {
                           boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
@@ -187,12 +259,12 @@ const ActionButtons = () => {
                   },
                 }}
               />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label>Até:</label>
               <DesktopDatePicker
                 value={endDate}
-                onChange={(newValue) => setEndDate(newValue)}
+                onChange={(newValue) => {
+                  setEndDate(newValue);
+                  setError(null); // Limpa erros ao mudar a data
+                }}
                 minDate={startDate}
                 format="DD/MM/YYYY"
                 shouldDisableDate={shouldDisableDate}
@@ -208,13 +280,14 @@ const ActionButtons = () => {
                     onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                     sx: { 
                       width: '100%',
-                      marginTop: '5px',
+                      marginBottom: '15px',
                       '& .MuiInputBase-root': {
                         height: '48px',
                         borderRadius: '32px',
                         cursor: 'pointer',
                         '& input': {
                           cursor: 'pointer',
+                          textAlign: 'center',
                         },
                         '&:hover': {
                           boxShadow: '0 2px 4px rgba(0,0,0,0.18)',
@@ -231,33 +304,41 @@ const ActionButtons = () => {
                   },
                 }}
               />
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label>Comentário:</label>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                style={{ width: '100%', padding: '8px', marginTop: '5px', minHeight: '100px', borderRadius: '8px', border: '1px solid #ddd' }}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{ ...buttonStyle, width: 'auto' }}
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                style={{ ...buttonStyle, width: 'auto', backgroundColor: '#007bff', color: 'white' }}
-                disabled={loading}
-              >
-                {loading ? 'Criando...' : 'Confirmar'}
-              </button>
-            </div>
-          </form>
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', textAlign: 'left' }}>Comentário:</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  style={{ 
+                    width: '100%', 
+                    padding: '8px', 
+                    marginTop: '5px', 
+                    minHeight: '100px', 
+                    borderRadius: '8px', 
+                    border: '1px solid #ddd',
+                    textAlign: 'center',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ ...buttonStyle, width: 'auto' }}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  style={{ ...buttonStyle, width: 'auto', backgroundColor: '#007bff', color: 'white' }}
+                  disabled={loading}
+                >
+                  {loading ? 'Criando...' : 'Confirmar'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
