@@ -3,6 +3,7 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';  // Importando o locale português
 import apiService from '../services/apiService';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Configurando o locale português como padrão
 dayjs.locale('pt-br');
@@ -61,6 +62,16 @@ const ActionButtons = () => {
     zIndex: 1000,
   };
 
+  const successModalStyle = {
+    ...modalStyle,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    padding: '40px 20px',
+  };
+
   const fetchAvailability = async () => {
     setLoading(true);
     try {
@@ -110,7 +121,6 @@ const ActionButtons = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage(null);
     setLoading(true);
 
     try {
@@ -119,12 +129,10 @@ const ActionButtons = () => {
         throw new Error('Por favor, selecione as datas inicial e final');
       }
 
-      // Verifica se a data final é anterior à data inicial
       if (endDate.isBefore(startDate)) {
         throw new Error('A data final não pode ser anterior à data inicial');
       }
 
-      // Verifica se há datas indisponíveis no intervalo
       if (hasUnavailableDatesInRange(startDate, endDate)) {
         throw new Error('Existem datas indisponíveis no período selecionado');
       }
@@ -183,12 +191,11 @@ const ActionButtons = () => {
         Editar regras
       </button>
 
-      {showModal && (
+      {showModal && !successMessage && (
         <div style={overlayStyle} onClick={handleOverlayClick}>
           <div style={modalStyle}>
             <h2 style={{ marginTop: 0 }}>Criar Bloqueio</h2>
             
-            {/* Mensagem de Erro */}
             {error && (
               <div style={{ 
                 color: 'red', 
@@ -198,19 +205,6 @@ const ActionButtons = () => {
                 borderRadius: '4px'
               }}>
                 {error}
-              </div>
-            )}
-
-            {/* Mensagem de Sucesso */}
-            {successMessage && (
-              <div style={{ 
-                color: 'green', 
-                marginBottom: '15px', 
-                padding: '10px', 
-                backgroundColor: 'rgba(0,255,0,0.1)',
-                borderRadius: '4px'
-              }}>
-                {successMessage}
               </div>
             )}
 
@@ -338,6 +332,58 @@ const ActionButtons = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showModal && successMessage && (
+        <div style={overlayStyle}>
+          <div style={successModalStyle}>
+            <svg 
+              viewBox="0 0 24 24" 
+              style={{ 
+                width: '240px',  // Reduzido para 240px
+                height: '240px', // Reduzido para 240px
+                marginBottom: '40px',
+                filter: 'drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.1))'
+              }}
+            >
+              <circle 
+                cx="12" 
+                cy="12" 
+                r="11" 
+                fill="#4CAF50" 
+                fillOpacity="0.1"
+              />
+              <circle 
+                cx="12" 
+                cy="12" 
+                r="8" 
+                fill="#4CAF50"
+              />
+              <path 
+                d="M8.5 12.5L11 15L15.5 9" 
+                stroke="white" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                fill="none"
+              />
+            </svg>
+            <h2 style={{ 
+              color: '#333',
+              marginBottom: '20px',
+              fontSize: '24px'
+            }}>
+              Bloqueio confirmado!
+            </h2>
+            <p style={{
+              color: '#666',
+              fontSize: '16px',
+              margin: 0
+            }}>
+              O período selecionado foi bloqueado com sucesso.
+            </p>
           </div>
         </div>
       )}
