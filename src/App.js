@@ -12,7 +12,6 @@ import GroupedBarChart from './components/GroupedBarChart';
 import AverageDailyRate from './components/AverageDailyRate';
 import AverageTicket from './components/AverageTicket';
 import apiService from './services/apiService';
-import StatsContainer from './components/StatsContainer';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -212,31 +211,52 @@ function App() {
                 top: '0',
                 width: '250px'
               }}>
-                <StatsContainer 
+                {/* <StatsContainer 
                   listingDetails={listingDetails} 
                   listingId={formData.listingId || 'CK01H'} 
-                />
+                /> */}
               </div>
             )}
 
             <div style={{ 
-              width: '800px',
+              width: '1240px',  // Ajustado para acomodar 2 gráficos + gap
               margin: '0 auto'
             }}>
-              {cancellations && <CancellationsByMonth reservations={cancellations} />}
-              {reservations && (
-                <>
-                  <ReservationsOverTime reservations={reservations} />
-                  <ReservationSourcesPie reservations={reservations} />
-                  <AverageTicket reservations={reservations} />
-                </>
-              )}
-              {availability && (
-                <>
-                  <GroupedBarChart availability={availability} />
-                  <AverageDailyRate rates={availability} />
-                </>
-              )}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '40px',
+                padding: '20px'
+              }}>
+                {cancellations && (
+                  <div>
+                    <CancellationsByMonth reservations={cancellations} />
+                  </div>
+                )}
+                {reservations && (
+                  <>
+                    <div>
+                      <ReservationsOverTime reservations={reservations} />
+                    </div>
+                    <div>
+                      <ReservationSourcesPie reservations={reservations} />
+                    </div>
+                    <div>
+                      <AverageTicket reservations={reservations} />
+                    </div>
+                  </>
+                )}
+                {availability && (
+                  <>
+                    <div>
+                      <GroupedBarChart availability={availability} />
+                    </div>
+                    <div>
+                      <AverageDailyRate rates={availability} />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           

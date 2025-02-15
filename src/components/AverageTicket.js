@@ -9,6 +9,7 @@ import {
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { ResponsiveContainer } from 'recharts';
 
 ChartJS.register(
   CategoryScale,
@@ -126,8 +127,10 @@ const AverageTicket = ({ reservations }) => {
   const chartData = processData(reservations || []);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '20px auto' }}>
-      <Bar options={options} data={chartData} />
+    <div style={{ height: '400px', width: '600px', marginBottom: '20px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <Bar options={options} data={chartData} />
+      </ResponsiveContainer>
     </div>
   );
 };

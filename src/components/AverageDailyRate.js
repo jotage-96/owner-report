@@ -10,6 +10,7 @@ import {
   Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { ResponsiveContainer } from 'recharts';
 
 ChartJS.register(
   CategoryScale,
@@ -132,8 +133,10 @@ const AverageDailyRate = ({ rates }) => {
   const chartData = processData(rates || []);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '20px auto' }}>
-      <Line options={options} data={chartData} />
+    <div style={{ height: '400px', width: '600px', marginBottom: '20px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <Line options={options} data={chartData} />
+      </ResponsiveContainer>
     </div>
   );
 };

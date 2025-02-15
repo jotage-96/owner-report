@@ -6,6 +6,7 @@ import {
   Legend
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { ResponsiveContainer } from 'recharts';
 
 ChartJS.register(
   ArcElement,
@@ -78,8 +79,10 @@ const ReservationSourcesPie = ({ reservations }) => {
   const chartData = processReservationSources(reservations || []);
 
   return (
-    <div style={{ maxWidth: '500px', margin: '20px auto' }}>
-      <Pie options={options} data={chartData} />
+    <div style={{ height: '400px', width: '600px', marginBottom: '20px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <Pie options={options} data={chartData} />
+      </ResponsiveContainer>
     </div>
   );
 };
