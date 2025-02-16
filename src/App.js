@@ -300,6 +300,25 @@ function App() {
                 className="search-button"
                 onClick={handleSearch}
                 disabled={loading}
+                style={{
+                  backgroundColor: 'rgb(0, 123, 255)',
+                  color: 'white',
+                  border: 'none',
+                  height: '48px',
+                  borderRadius: '32px',
+                  padding: '0 24px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s',
+                  '&:hover': {
+                    backgroundColor: 'rgb(0, 105, 217)'
+                  },
+                  '&:disabled': {
+                    opacity: 0.7,
+                    cursor: 'not-allowed'
+                  }
+                }}
               >
                 {loading ? 'Buscando...' : 'Buscar'}
               </button>

@@ -25,6 +25,7 @@ const ActionButtons = () => {
   const [rulesError, setRulesError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedRules, setEditedRules] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const buttonStyle = {
     width: '100%',
@@ -293,12 +294,16 @@ const ActionButtons = () => {
 
   const handleSaveRules = async () => {
     setLoadingRules(true);
-    setRulesError(null);
     try {
       await apiService.updateRules('CK01H', editedRules);
-      setRules(editedRules);
-      setIsEditing(false);
-      // Opcional: mostrar mensagem de sucesso
+      setShowRulesModal(false);
+      setSuccessMessage('Regras atualizadas com sucesso!');
+      setShowSuccessModal(true);
+      // Fechar o modal de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setSuccessMessage('');
+      }, 3000);
     } catch (error) {
       setRulesError(error.message);
     } finally {
@@ -872,6 +877,34 @@ const ActionButtons = () => {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && (
+        <div style={overlayStyle}>
+          <div style={successModalStyle}>
+            <CheckCircleIcon 
+              sx={{ 
+                width: 120,  // Definindo largura do SVG
+                height: 120, // Definindo altura do SVG
+                color: '#4CAF50',
+                marginBottom: '20px'
+              }} 
+            />
+            <h2 style={{ 
+              color: '#333',
+              marginBottom: '10px'
+            }}>
+              Sucesso!
+            </h2>
+            <p style={{ 
+              color: '#666',
+              fontSize: '16px'
+            }}>
+              {successMessage}
+            </p>
           </div>
         </div>
       )}
