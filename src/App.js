@@ -137,6 +137,14 @@ function App() {
       endDate: newValue
     }));
     setOpenSecondPicker(false);
+    
+    // Adiciona um pequeno delay para garantir que o DatePicker feche completamente
+    setTimeout(() => {
+      const listingInput = document.querySelector('input[name="listingId"]');
+      if (listingInput) {
+        listingInput.focus();
+      }
+    }, 100);
   };
 
   const handleEndDateClick = (e) => {
@@ -230,6 +238,7 @@ function App() {
                       onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                       inputProps: {
                         value: formData.startDate ? formatDisplayDate(formData.startDate) : '',
+                        readOnly: true,
                       }
                     },
                     day: datePickerStyles.day
@@ -257,6 +266,7 @@ function App() {
                       onClick: handleEndDateClick,
                       inputProps: {
                         value: formData.endDate ? formatDisplayDate(formData.endDate) : '',
+                        readOnly: true,
                       }
                     },
                     day: datePickerStyles.day

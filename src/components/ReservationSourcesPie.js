@@ -58,10 +58,6 @@ const ReservationSourcesPie = ({ reservations }) => {
       legend: {
         position: 'right',
       },
-      title: {
-        display: true,
-        text: 'Distribuição das Fontes de Reserva'
-      },
       tooltip: {
         callbacks: {
           label: (context) => {
@@ -80,6 +76,7 @@ const ReservationSourcesPie = ({ reservations }) => {
 
   return (
     <div style={{ height: '400px', width: '600px', marginBottom: '20px' }}>
+      <h3 style={{ marginBottom: '20px' }}>Distribuição das Fontes de Reserva</h3>
       <ResponsiveContainer width="100%" height="100%">
         <Pie options={options} data={chartData} />
       </ResponsiveContainer>

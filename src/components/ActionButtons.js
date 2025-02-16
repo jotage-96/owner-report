@@ -172,6 +172,14 @@ const ActionButtons = () => {
     setEndDate(newValue);
     setError(null);
     setOpenSecondPicker(false);
+
+    // Adiciona um pequeno delay para garantir que o DatePicker feche completamente
+    setTimeout(() => {
+      const commentTextarea = document.querySelector('textarea');
+      if (commentTextarea) {
+        commentTextarea.focus();
+      }
+    }, 100);
   };
 
   const handleEndDateClick = (e) => {
@@ -299,6 +307,7 @@ const ActionButtons = () => {
                     onClick: (e) => e.target.closest('.MuiFormControl-root').querySelector('button').click(),
                     inputProps: {
                       value: startDate ? formatDisplayDate(startDate) : '',
+                      readOnly: true,
                     }
                   },
                   day: datePickerStyles.day
@@ -324,6 +333,7 @@ const ActionButtons = () => {
                     onClick: handleEndDateClick,
                     inputProps: {
                       value: endDate ? formatDisplayDate(endDate) : '',
+                      readOnly: true,
                     }
                   },
                   day: datePickerStyles.day
@@ -341,7 +351,8 @@ const ActionButtons = () => {
                     minHeight: '100px', 
                     borderRadius: '8px', 
                     border: '1px solid #ddd',
-                    textAlign: 'center',
+                    textAlign: 'left',
+                    fontSize: '16px',
                   }}
                 />
               </div>
