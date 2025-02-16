@@ -306,7 +306,7 @@ const ActionButtons = () => {
     }
   };
 
-  // Funções para atualizar os campos
+  // Funções de atualização
   const handleUpdateRule = (field, value) => {
     setEditedRules(prev => ({
       ...prev,
@@ -605,6 +605,7 @@ const ActionButtons = () => {
                     </button>
                     <button
                       disabled={!isEditing}
+                      onClick={() => handleUpdateRule('smoking', false)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
@@ -645,6 +646,7 @@ const ActionButtons = () => {
                     </button>
                     <button
                       disabled={!isEditing}
+                      onClick={() => handleUpdatePetsRule('allowed', 'no')}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
@@ -658,11 +660,12 @@ const ActionButtons = () => {
                     </button>
                     <button
                       disabled={!isEditing}
+                      onClick={() => handleUpdatePetsRule('allowed', 'onrequest')}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: editedRules?.pets.allowed === 'upon_request' ? '#007bff' : 'white',
-                        color: editedRules?.pets.allowed === 'upon_request' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.allowed === 'onrequest' ? '#007bff' : 'white',
+                        color: editedRules?.pets.allowed === 'onrequest' ? 'white' : 'black',
                         opacity: !isEditing ? 0.7 : 1,
                         cursor: isEditing ? 'pointer' : 'default',
                       }}
@@ -670,34 +673,39 @@ const ActionButtons = () => {
                       Mediante Solicitação
                     </button>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      disabled={!isEditing}
-                      style={{
-                        ...buttonStyle,
-                        width: 'auto',
-                        backgroundColor: editedRules?.pets.charge === 'free' ? '#007bff' : 'white',
-                        color: editedRules?.pets.charge === 'free' ? 'white' : 'black',
-                        opacity: !isEditing ? 0.7 : 1,
-                        cursor: isEditing ? 'pointer' : 'default',
-                      }}
-                    >
-                      Grátis
-                    </button>
-                    <button
-                      disabled={!isEditing}
-                      style={{
-                        ...buttonStyle,
-                        width: 'auto',
-                        backgroundColor: editedRules?.pets.charge === 'paid' ? '#007bff' : 'white',
-                        color: editedRules?.pets.charge === 'paid' ? 'white' : 'black',
-                        opacity: !isEditing ? 0.7 : 1,
-                        cursor: isEditing ? 'pointer' : 'default',
-                      }}
-                    >
-                      Possibilidade de Cobrança
-                    </button>
-                  </div>
+                  {/* Mostra as opções de cobrança apenas se pets.allowed for 'yes' ou 'onrequest' */}
+                  {editedRules?.pets.allowed !== 'no' && (
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        disabled={!isEditing}
+                        onClick={() => handleUpdatePetsRule('charge', 'free')}
+                        style={{
+                          ...buttonStyle,
+                          width: 'auto',
+                          backgroundColor: editedRules?.pets.charge === 'free' ? '#007bff' : 'white',
+                          color: editedRules?.pets.charge === 'free' ? 'white' : 'black',
+                          opacity: !isEditing ? 0.7 : 1,
+                          cursor: isEditing ? 'pointer' : 'default',
+                        }}
+                      >
+                        Grátis
+                      </button>
+                      <button
+                        disabled={!isEditing}
+                        onClick={() => handleUpdatePetsRule('charge', 'chargesmayapply')}
+                        style={{
+                          ...buttonStyle,
+                          width: 'auto',
+                          backgroundColor: editedRules?.pets.charge === 'chargesmayapply' ? '#007bff' : 'white',
+                          color: editedRules?.pets.charge === 'chargesmayapply' ? 'white' : 'black',
+                          opacity: !isEditing ? 0.7 : 1,
+                          cursor: isEditing ? 'pointer' : 'default',
+                        }}
+                      >
+                        Possibilidade de Cobrança
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
@@ -726,6 +734,7 @@ const ActionButtons = () => {
                     </button>
                     <button
                       disabled={!isEditing}
+                      onClick={() => handleUpdateRule('events', false)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
@@ -766,6 +775,7 @@ const ActionButtons = () => {
                     </button>
                     <button
                       disabled={!isEditing}
+                      onClick={() => handleUpdateQuietHours('enabled', false)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',

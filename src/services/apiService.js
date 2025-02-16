@@ -175,6 +175,26 @@ class ApiService {
 
   async updateRules(listingId, rulesData) {
     try {
+      // Prepara o payload base
+      const payload = {
+        smokingAllowed: rulesData.smoking,
+        eventsAllowed: rulesData.events,
+        quietHours: rulesData.quiet_hours.enabled,
+        petsAllowed: rulesData.pets.allowed,
+        petsPriceType: rulesData.pets.charge,
+        _mshouserules: {
+          pt_BR: rulesData.additional_rules
+        }
+      };
+
+      // Adiciona quietHoursDetails apenas se quietHours for true
+      if (rulesData.quiet_hours.enabled) {
+        payload.quietHoursDetails = {
+          _i_from: timeToHour(rulesData.quiet_hours.start || '22:00'),
+          _i_to: timeToHour(rulesData.quiet_hours.end || '06:00')
+        };
+      }
+
       const response = await fetch(
         `/external/v1/settings/listing/${listingId}/house-rules`,
         {
@@ -183,20 +203,7 @@ class ApiService {
             'Content-Type': 'application/json',
             'Authorization': `Basic ${this.getAuthHeader()}`
           },
-          body: JSON.stringify({
-            smokingAllowed: rulesData.smoking,
-            eventsAllowed: rulesData.events,
-            quietHours: rulesData.quiet_hours.enabled,
-            quietHoursDetails: rulesData.quiet_hours.enabled ? {
-              _i_from: timeToHour(rulesData.quiet_hours.start || '22:00'),
-              _i_to: timeToHour(rulesData.quiet_hours.end || '06:00')
-            } : null,
-            petsAllowed: rulesData.pets.allowed,
-            petsPriceType: rulesData.pets.charge,
-            _mshouserules: {
-              pt_BR: rulesData.additional_rules
-            }
-          })
+          body: JSON.stringify(payload)
         }
       );
 
