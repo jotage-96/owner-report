@@ -136,6 +136,18 @@ class ApiService {
       throw new Error(`Erro ao criar bloqueio: ${error.message}`);
     }
   }
+
+  async getRules(listingId) {
+    try {
+      const response = await fetch(`${BASE_URL}/rules/${listingId}`);
+      if (!response.ok) {
+        throw new Error('Falha ao buscar regras');
+      }
+      return await response.json();
+    } catch (error) {
+      throw new Error('Erro ao buscar regras: ' + error.message);
+    }
+  }
 }
 
 export default new ApiService();

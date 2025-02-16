@@ -19,6 +19,10 @@ const ActionButtons = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [openSecondPicker, setOpenSecondPicker] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [rules, setRules] = useState(null);
+  const [loadingRules, setLoadingRules] = useState(false);
+  const [rulesError, setRulesError] = useState(null);
 
   const buttonStyle = {
     width: '100%',
@@ -256,6 +260,43 @@ const ActionButtons = () => {
     return `${date.date()} de ${meses[date.month()]}`;
   };
 
+  // Mock dos dados que virão da API
+  const mockRules = {
+    smoking: false,
+    pets: {
+      allowed: "upon_request", // "yes", "no", "upon_request"
+      charge: "paid" // "free", "paid"
+    },
+    events: false,
+    quiet_hours: {
+      enabled: true,
+      start: "21:00",
+      end: "08:00"
+    },
+    additional_rules: "Regras adicionais em português..." // Simplificado para string única
+  };
+
+  const handleOpenRulesModal = async () => {
+    setLoadingRules(true);
+    setRulesError(null);
+    try {
+      // Simular chamada API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setRules(mockRules);
+      setShowRulesModal(true);
+    } catch (error) {
+      setRulesError(error.message);
+    } finally {
+      setLoadingRules(false);
+    }
+  };
+
+  const handleCloseRulesModal = () => {
+    setShowRulesModal(false);
+    setRules(null);
+    setRulesError(null);
+  };
+
   return (
     <div style={containerStyle}>
       <button 
@@ -268,8 +309,12 @@ const ActionButtons = () => {
       <button style={buttonStyle}>
         Alterar preço
       </button>
-      <button style={buttonStyle}>
-        Editar regras
+      <button 
+        style={buttonStyle}
+        onClick={handleOpenRulesModal}
+        disabled={loadingRules}
+      >
+        {loadingRules ? 'Carregando...' : 'Editar regras'}
       </button>
 
       {showModal && !successMessage && (
@@ -426,6 +471,240 @@ const ActionButtons = () => {
             }}>
               O período selecionado foi bloqueado com sucesso.
             </p>
+          </div>
+        </div>
+      )}
+
+      {showRulesModal && (
+        <div style={overlayStyle} onClick={(e) => {
+          if (e.target === e.currentTarget) handleCloseRulesModal();
+        }}>
+          <div style={modalStyle}>
+            <h2 style={{ marginTop: 0 }}>Editar Regras</h2>
+            
+            {rulesError && (
+              <div style={{ 
+                color: 'red', 
+                marginBottom: '15px', 
+                padding: '10px', 
+                backgroundColor: 'rgba(255,0,0,0.1)',
+                borderRadius: '4px'
+              }}>
+                {rulesError}
+              </div>
+            )}
+
+            {loadingRules ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                Carregando regras...
+              </div>
+            ) : rules ? (
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                    É permitido fumar na acomodação?
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.smoking ? '#007bff' : 'white',
+                        color: rules.smoking ? 'white' : 'black',
+                      }}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: !rules.smoking ? '#007bff' : 'white',
+                        color: !rules.smoking ? 'white' : 'black',
+                      }}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                    Você aceita animais de estimação?
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.pets.allowed === 'yes' ? '#007bff' : 'white',
+                        color: rules.pets.allowed === 'yes' ? 'white' : 'black',
+                      }}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.pets.allowed === 'no' ? '#007bff' : 'white',
+                        color: rules.pets.allowed === 'no' ? 'white' : 'black',
+                      }}
+                    >
+                      Não
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.pets.allowed === 'upon_request' ? '#007bff' : 'white',
+                        color: rules.pets.allowed === 'upon_request' ? 'white' : 'black',
+                      }}
+                    >
+                      Mediante Solicitação
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.pets.charge === 'free' ? '#007bff' : 'white',
+                        color: rules.pets.charge === 'free' ? 'white' : 'black',
+                      }}
+                    >
+                      Grátis
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.pets.charge === 'paid' ? '#007bff' : 'white',
+                        color: rules.pets.charge === 'paid' ? 'white' : 'black',
+                      }}
+                    >
+                      Possibilidade de Cobrança
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                    É permitido fazer eventos?
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.events ? '#007bff' : 'white',
+                        color: rules.events ? 'white' : 'black',
+                      }}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: !rules.events ? '#007bff' : 'white',
+                        color: !rules.events ? 'white' : 'black',
+                      }}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                    Há regras de silêncio?
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: rules.quiet_hours.enabled ? '#007bff' : 'white',
+                        color: rules.quiet_hours.enabled ? 'white' : 'black',
+                      }}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        width: 'auto',
+                        backgroundColor: !rules.quiet_hours.enabled ? '#007bff' : 'white',
+                        color: !rules.quiet_hours.enabled ? 'white' : 'black',
+                      }}
+                    >
+                      Não
+                    </button>
+                  </div>
+                  {rules.quiet_hours.enabled && (
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <input
+                        type="time"
+                        value={rules.quiet_hours.start}
+                        style={{
+                          padding: '8px',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                        }}
+                      />
+                      <span>até</span>
+                      <input
+                        type="time"
+                        value={rules.quiet_hours.end}
+                        style={{
+                          padding: '8px',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                    Regras adicionais
+                  </label>
+                  <textarea
+                    value={rules.additional_rules}
+                    placeholder="Digite aqui as regras adicionais..."
+                    style={{ 
+                      width: '100%', 
+                      padding: '8px', 
+                      minHeight: '100px', 
+                      borderRadius: '8px', 
+                      border: '1px solid #ddd',
+                      fontSize: '16px',
+                    }}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleCloseRulesModal}
+                style={{ ...buttonStyle, width: 'auto' }}
+              >
+                Fechar
+              </button>
+              <button
+                style={{ 
+                  ...buttonStyle, 
+                  width: 'auto', 
+                  backgroundColor: '#007bff', 
+                  color: 'white' 
+                }}
+              >
+                Salvar
+              </button>
+            </div>
           </div>
         </div>
       )}
