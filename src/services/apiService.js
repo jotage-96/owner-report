@@ -1,4 +1,18 @@
-const BASE_URL = 'https://joaoguilherme.stays.com.br';
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:3001'  // Development
+  : 'https://joaoguilherme.stays.com.br'; // Production
+
+// Função auxiliar para converter horário (HH:mm) para minutos desde meia-noite
+const timeToMinutes = (time) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return (hours * 60) + minutes;
+};
+
+// Função auxiliar para extrair apenas a hora do formato HH:mm
+const timeToHour = (time) => {
+  const [hours] = time.split(':').map(Number);
+  return hours;
+};
 
 class ApiService {
   constructor() {
@@ -139,13 +153,61 @@ class ApiService {
 
   async getRules(listingId) {
     try {
-      const response = await fetch(`${BASE_URL}/rules/${listingId}`);
+      const response = await fetch(
+        `/external/v1/settings/listing/${listingId}/house-rules`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${this.getAuthHeader()}`
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error('Falha ao buscar regras');
       }
       return await response.json();
     } catch (error) {
       throw new Error('Erro ao buscar regras: ' + error.message);
+    }
+  }
+
+  async updateRules(listingId, rulesData) {
+    try {
+      const response = await fetch(
+        `/external/v1/settings/listing/${listingId}/house-rules`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${this.getAuthHeader()}`
+          },
+          body: JSON.stringify({
+            smokingAllowed: rulesData.smoking,
+            eventsAllowed: rulesData.events,
+            quietHours: rulesData.quiet_hours.enabled,
+            quietHoursDetails: rulesData.quiet_hours.enabled ? {
+              _i_from: timeToHour(rulesData.quiet_hours.start || '22:00'),
+              _i_to: timeToHour(rulesData.quiet_hours.end || '06:00')
+            } : null,
+            petsAllowed: rulesData.pets.allowed,
+            petsPriceType: rulesData.pets.charge,
+            _mshouserules: {
+              pt_BR: rulesData.additional_rules
+            }
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao atualizar regras');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw new Error(`Erro ao atualizar regras: ${error.message}`);
     }
   }
 }

@@ -23,6 +23,8 @@ const ActionButtons = () => {
   const [rules, setRules] = useState(null);
   const [loadingRules, setLoadingRules] = useState(false);
   const [rulesError, setRulesError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedRules, setEditedRules] = useState(null);
 
   const buttonStyle = {
     width: '100%',
@@ -260,29 +262,27 @@ const ActionButtons = () => {
     return `${date.date()} de ${meses[date.month()]}`;
   };
 
-  // Mock dos dados que virão da API
-  const mockRules = {
-    smoking: false,
-    pets: {
-      allowed: "upon_request", // "yes", "no", "upon_request"
-      charge: "paid" // "free", "paid"
-    },
-    events: false,
-    quiet_hours: {
-      enabled: true,
-      start: "21:00",
-      end: "08:00"
-    },
-    additional_rules: "Regras adicionais em português..." // Simplificado para string única
-  };
-
   const handleOpenRulesModal = async () => {
     setLoadingRules(true);
     setRulesError(null);
     try {
-      // Simular chamada API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setRules(mockRules);
+      const rulesData = await apiService.getRules('CK01H');
+      const mappedRules = {
+        smoking: rulesData.smokingAllowed,
+        pets: {
+          allowed: rulesData.petsAllowed,
+          charge: rulesData.petsPriceType
+        },
+        events: rulesData.eventsAllowed,
+        quiet_hours: {
+          enabled: rulesData.quietHours,
+          start: "21:00",
+          end: "08:00"
+        },
+        additional_rules: rulesData._mshouserules.pt_BR
+      };
+      setRules(mappedRules);
+      setEditedRules(mappedRules); // Inicializa o estado de edição com os valores atuais
       setShowRulesModal(true);
     } catch (error) {
       setRulesError(error.message);
@@ -291,10 +291,70 @@ const ActionButtons = () => {
     }
   };
 
+  const handleSaveRules = async () => {
+    setLoadingRules(true);
+    setRulesError(null);
+    try {
+      await apiService.updateRules('CK01H', editedRules);
+      setRules(editedRules);
+      setIsEditing(false);
+      // Opcional: mostrar mensagem de sucesso
+    } catch (error) {
+      setRulesError(error.message);
+    } finally {
+      setLoadingRules(false);
+    }
+  };
+
+  // Funções para atualizar os campos
+  const handleUpdateRule = (field, value) => {
+    setEditedRules(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleUpdatePetsRule = (field, value) => {
+    setEditedRules(prev => ({
+      ...prev,
+      pets: {
+        ...prev.pets,
+        [field]: value
+      }
+    }));
+  };
+
+  const handleUpdateQuietHours = (field, value) => {
+    setEditedRules(prev => ({
+      ...prev,
+      quiet_hours: {
+        ...prev.quiet_hours,
+        [field]: value
+      }
+    }));
+  };
+
   const handleCloseRulesModal = () => {
     setShowRulesModal(false);
     setRules(null);
     setRulesError(null);
+  };
+
+  const handleAdditionalRulesChange = (e) => {
+    setEditedRules(prev => ({
+      ...prev,
+      additional_rules: e.target.value
+    }));
+  };
+
+  const handleQuietHoursTimeChange = (field, e) => {
+    setEditedRules(prev => ({
+      ...prev,
+      quiet_hours: {
+        ...prev.quiet_hours,
+        [field]: e.target.value
+      }
+    }));
   };
 
   return (
@@ -480,8 +540,27 @@ const ActionButtons = () => {
           if (e.target === e.currentTarget) handleCloseRulesModal();
         }}>
           <div style={modalStyle}>
-            <h2 style={{ marginTop: 0 }}>Editar Regras</h2>
-            
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}>
+              <h2 style={{ margin: 0 }}>Regras da Casa</h2>
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                style={{
+                  ...buttonStyle,
+                  width: 'auto',
+                  backgroundColor: isEditing ? '#dc3545' : '#007bff',
+                  color: 'white',
+                  padding: '8px 16px',
+                }}
+              >
+                {isEditing ? 'Cancelar Edição' : 'Editar Regras'}
+              </button>
+            </div>
+
             {rulesError && (
               <div style={{ 
                 color: 'red', 
@@ -501,26 +580,38 @@ const ActionButtons = () => {
             ) : rules ? (
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '10px',
+                    textAlign: 'left', // Alinhamento à esquerda
+                    fontWeight: '500'
+                  }}>
                     É permitido fumar na acomodação?
                   </label>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button
+                      disabled={!isEditing}
+                      onClick={() => handleUpdateRule('smoking', true)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.smoking ? '#007bff' : 'white',
-                        color: rules.smoking ? 'white' : 'black',
+                        backgroundColor: editedRules?.smoking ? '#007bff' : 'white',
+                        color: editedRules?.smoking ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Sim
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: !rules.smoking ? '#007bff' : 'white',
-                        color: !rules.smoking ? 'white' : 'black',
+                        backgroundColor: !editedRules?.smoking ? '#007bff' : 'white',
+                        color: !editedRules?.smoking ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Não
@@ -529,36 +620,51 @@ const ActionButtons = () => {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '10px',
+                    textAlign: 'left',
+                    fontWeight: '500'
+                  }}>
                     Você aceita animais de estimação?
                   </label>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                     <button
+                      disabled={!isEditing}
+                      onClick={() => handleUpdatePetsRule('allowed', 'yes')}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.pets.allowed === 'yes' ? '#007bff' : 'white',
-                        color: rules.pets.allowed === 'yes' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.allowed === 'yes' ? '#007bff' : 'white',
+                        color: editedRules?.pets.allowed === 'yes' ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Sim
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.pets.allowed === 'no' ? '#007bff' : 'white',
-                        color: rules.pets.allowed === 'no' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.allowed === 'no' ? '#007bff' : 'white',
+                        color: editedRules?.pets.allowed === 'no' ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Não
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.pets.allowed === 'upon_request' ? '#007bff' : 'white',
-                        color: rules.pets.allowed === 'upon_request' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.allowed === 'upon_request' ? '#007bff' : 'white',
+                        color: editedRules?.pets.allowed === 'upon_request' ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Mediante Solicitação
@@ -566,21 +672,27 @@ const ActionButtons = () => {
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.pets.charge === 'free' ? '#007bff' : 'white',
-                        color: rules.pets.charge === 'free' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.charge === 'free' ? '#007bff' : 'white',
+                        color: editedRules?.pets.charge === 'free' ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Grátis
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.pets.charge === 'paid' ? '#007bff' : 'white',
-                        color: rules.pets.charge === 'paid' ? 'white' : 'black',
+                        backgroundColor: editedRules?.pets.charge === 'paid' ? '#007bff' : 'white',
+                        color: editedRules?.pets.charge === 'paid' ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Possibilidade de Cobrança
@@ -589,26 +701,38 @@ const ActionButtons = () => {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '10px',
+                    textAlign: 'left',
+                    fontWeight: '500'
+                  }}>
                     É permitido fazer eventos?
                   </label>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button
+                      disabled={!isEditing}
+                      onClick={() => handleUpdateRule('events', true)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.events ? '#007bff' : 'white',
-                        color: rules.events ? 'white' : 'black',
+                        backgroundColor: editedRules?.events ? '#007bff' : 'white',
+                        color: editedRules?.events ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Sim
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: !rules.events ? '#007bff' : 'white',
-                        color: !rules.events ? 'white' : 'black',
+                        backgroundColor: !editedRules?.events ? '#007bff' : 'white',
+                        color: !editedRules?.events ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Não
@@ -617,50 +741,70 @@ const ActionButtons = () => {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '10px',
+                    textAlign: 'left',
+                    fontWeight: '500'
+                  }}>
                     Há regras de silêncio?
                   </label>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                     <button
+                      disabled={!isEditing}
+                      onClick={() => handleUpdateQuietHours('enabled', true)}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: rules.quiet_hours.enabled ? '#007bff' : 'white',
-                        color: rules.quiet_hours.enabled ? 'white' : 'black',
+                        backgroundColor: editedRules?.quiet_hours.enabled ? '#007bff' : 'white',
+                        color: editedRules?.quiet_hours.enabled ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Sim
                     </button>
                     <button
+                      disabled={!isEditing}
                       style={{
                         ...buttonStyle,
                         width: 'auto',
-                        backgroundColor: !rules.quiet_hours.enabled ? '#007bff' : 'white',
-                        color: !rules.quiet_hours.enabled ? 'white' : 'black',
+                        backgroundColor: !editedRules?.quiet_hours.enabled ? '#007bff' : 'white',
+                        color: !editedRules?.quiet_hours.enabled ? 'white' : 'black',
+                        opacity: !isEditing ? 0.7 : 1,
+                        cursor: isEditing ? 'pointer' : 'default',
                       }}
                     >
                       Não
                     </button>
                   </div>
-                  {rules.quiet_hours.enabled && (
+                  {editedRules?.quiet_hours.enabled && (
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                       <input
                         type="time"
-                        value={rules.quiet_hours.start}
+                        value={editedRules?.quiet_hours.start || ''}
+                        onChange={(e) => handleQuietHoursTimeChange('start', e)}
+                        disabled={!isEditing}
                         style={{
                           padding: '8px',
                           borderRadius: '8px',
                           border: '1px solid #ddd',
+                          opacity: !isEditing ? 0.7 : 1,
+                          cursor: isEditing ? 'text' : 'default',
                         }}
                       />
                       <span>até</span>
                       <input
                         type="time"
-                        value={rules.quiet_hours.end}
+                        value={editedRules?.quiet_hours.end || ''}
+                        onChange={(e) => handleQuietHoursTimeChange('end', e)}
+                        disabled={!isEditing}
                         style={{
                           padding: '8px',
                           borderRadius: '8px',
                           border: '1px solid #ddd',
+                          opacity: !isEditing ? 0.7 : 1,
+                          cursor: isEditing ? 'text' : 'default',
                         }}
                       />
                     </div>
@@ -668,11 +812,18 @@ const ActionButtons = () => {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '10px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '10px',
+                    textAlign: 'left',
+                    fontWeight: '500'
+                  }}>
                     Regras adicionais
                   </label>
                   <textarea
-                    value={rules.additional_rules}
+                    value={editedRules?.additional_rules || ''}
+                    onChange={handleAdditionalRulesChange}
+                    disabled={!isEditing}
                     placeholder="Digite aqui as regras adicionais..."
                     style={{ 
                       width: '100%', 
@@ -681,6 +832,8 @@ const ActionButtons = () => {
                       borderRadius: '8px', 
                       border: '1px solid #ddd',
                       fontSize: '16px',
+                      backgroundColor: !isEditing ? '#f5f5f5' : 'white',
+                      cursor: isEditing ? 'text' : 'default',
                     }}
                   />
                 </div>
@@ -694,16 +847,20 @@ const ActionButtons = () => {
               >
                 Fechar
               </button>
-              <button
-                style={{ 
-                  ...buttonStyle, 
-                  width: 'auto', 
-                  backgroundColor: '#007bff', 
-                  color: 'white' 
-                }}
-              >
-                Salvar
-              </button>
+              {isEditing && (
+                <button
+                  onClick={handleSaveRules}
+                  disabled={loadingRules}
+                  style={{ 
+                    ...buttonStyle, 
+                    width: 'auto', 
+                    backgroundColor: '#007bff', 
+                    color: 'white' 
+                  }}
+                >
+                  {loadingRules ? 'Salvando...' : 'Salvar'}
+                </button>
+              )}
             </div>
           </div>
         </div>
